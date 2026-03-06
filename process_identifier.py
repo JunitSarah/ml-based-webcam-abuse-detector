@@ -1,268 +1,345 @@
 """
-Process Identifier Module
-Identifies which process is currently accessing the webcam
+process_identification.py
+Identifies processes currently accessing the webcam on Windows
+and extracts ML features.
 """
 
+import csv
+import json
+import time
+import ctypes
+import ctypes.wintypes
+import datetime
+
 import psutil
-import os
-import hashlib
-from datetime import datetime
-import logging
+import winreg
+
+# ─────────────────────────────────────────────
+# CONFIGURATION
+# ─────────────────────────────────────────────
+
+OUTPUT_JSON = "process_features.json"
+OUTPUT_CSV = "process_features.csv"
+
+KNOWN_APPS = {
+    "zoom", "ms-teams", "teams", "skype", "webex", "discord", "slack",
+    "chrome", "firefox", "msedge", "opera", "brave",
+    "obs64", "obs32", "vlc", "camera", "windowscamera",
+    "facetime", "meet", "gotomeeting", "ringcentral",
+}
+
+FEATURE_KEYS = [
+    "is_known_app",
+    "is_foreground",
+    "user_active",
+    "is_night",
+    "has_network_connection",
+    "network_connection_count",
+    "duration_minutes",
+]
+
+# Track session start time
+_session_start = {}
+
+# Windows APIs
+user32 = ctypes.windll.user32
+kernel32 = ctypes.windll.kernel32
 
 
-class ProcessIdentifier:
-    """
-    Identifies and tracks processes using the webcam
-    """
-    
-    def __init__(self):
-        """Initialize the process identifier"""
-        self.cache = {}  # Cache process information to avoid repeated lookups
-        self.logger = self._setup_logger()
-        self.logger.info("ProcessIdentifier initialized")
-    
-    def _setup_logger(self):
-        """Set up logging for this module"""
-        os.makedirs('logs', exist_ok=True)
-        logging.basicConfig(
-            filename='logs/process_identifier.log',
-            level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-        return logging.getLogger(__name__)
-    
-    def get_all_processes(self):
-        """
-        Get information about all running processes
-        
-        Returns: 
-            List of process dictionaries
-        """
-        processes = []
-        for proc in psutil.process_iter(['pid', 'name', 'exe', 'username']):
-            try:
-                pinfo = proc.info
-                processes.append({
-                    'pid': pinfo['pid'],
-                    'name': pinfo['name'],
-                    'exe': pinfo['exe'],
-                    'username': pinfo['username']
-                })
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                # Some processes can't be accessed (system processes, etc.)
-                pass
-        return processes
-    
-    def get_processes_using_camera(self):
-        """
-        Find processes that are currently using the webcam
-        
-        Returns: 
-            List of process information dictionaries
-        """
-        camera_processes = []
-        self.logger.info("Scanning for processes using camera...")
-        
-        for proc in psutil.process_iter(['pid', 'name', 'exe', 'username']):
-            try:
-                if self._is_using_camera(proc):
-                    process_info = self._extract_process_info(proc)
-                    if process_info:
-                        camera_processes.append(process_info)
-                        self.logger.info(f"Found camera process: {process_info['name']}")
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                continue
-        
-        return camera_processes
-    
-    def _is_using_camera(self, proc):
-        """
-        Check if a specific process is using the camera
-        
-        Methods:
-        1. Check open file handles for video devices
-        2. Check against known camera applications
-        3. Check for specific DLLs loaded (Windows)
-        """
+class LASTINPUTINFO(ctypes.Structure):
+    _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
+
+
+# ─────────────────────────────────────────────
+# STEP 1 — REGISTRY DETECTION
+# ─────────────────────────────────────────────
+
+def _get_pids_via_registry():
+
+    pids = {}
+
+    registry_paths = [
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam",
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam\NonPackaged",
+    ]
+
+    for reg_path in registry_paths:
+
         try:
-            process_name = proc.info['name'].lower()
-            
-            # Method 1: Check against known camera applications
-            # This is the most reliable method for now
-            camera_apps = [
-                'zoom', 'teams', 'skype', 'chrome', 'firefox',
-                'obs', 'discord', 'slack', 'camera', 'webcam',
-                'meet', 'webex', 'facetime', 'whatsapp'
-            ]
-            
-            if any(app in process_name for app in camera_apps):
-                # Additional verification: check if process has network activity
-                # Camera apps usually have network connections
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path)
+            i = 0
+
+            while True:
+
                 try:
-                    connections = proc.connections(kind='inet')
-                    if len(connections) > 0:
-                        return True
-                except:
-                    # Even without network check, if it's a known app, flag it
-                    return True
-            
-            # Method 2: Check open files (works on Linux/Mac better than Windows)
-            try:
-                open_files = proc.open_files()
-                for file in open_files:
-                    file_path = file.path.lower()
-                    if 'video' in file_path or 'camera' in file_path:
-                        return True
-            except:
-                pass
-                
-        except Exception as e:
-            self.logger.debug(f"Error checking process: {e}")
-        
-        return False
-    
-    def _extract_process_info(self, proc):
-        """
-        Extract detailed information about a process
-        
-        Returns: 
-            Dictionary with process details
-        """
-        try:
-            info = proc.info
-            exe_path = info.get('exe', 'Unknown')
-            
-            # Get memory info
-            try:
-                memory_info = proc.memory_info()
-                memory_mb = memory_info.rss / (1024 * 1024)  # Convert bytes to MB
-            except:
-                memory_mb = 0
-            
-            # Get CPU usage
-            try:
-                cpu_percent = proc.cpu_percent(interval=0.1)
-            except:
-                cpu_percent = 0
-            
-            process_data = {
-                'pid': info['pid'],
-                'name': info['name'],
-                'exe_path': exe_path,
-                'username': info.get('username', 'Unknown'),
-                'exe_hash': self._get_file_hash(exe_path) if exe_path != 'Unknown' else None,
-                'timestamp': datetime.now().isoformat(),
-                'cpu_percent': round(cpu_percent, 2),
-                'memory_mb': round(memory_mb, 2)
-            }
-            
-            return process_data
-            
-        except Exception as e:
-            self.logger.error(f"Error extracting process info: {e}")
-            return None
-    
-    def _get_file_hash(self, filepath):
-        """
-        Calculate SHA256 hash of the executable file
-        This helps identify if the file has been modified (malware detection)
-        """
-        if not filepath or not os.path.exists(filepath):
-            return None
-        
-        # Check cache first
-        if filepath in self.cache:
-            return self.cache[filepath]
-        
-        try:
-            sha256_hash = hashlib.sha256()
-            
-            # Read file in chunks to handle large files
-            with open(filepath, 'rb') as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(chunk)
-            
-            file_hash = sha256_hash.hexdigest()
-            
-            # Cache the result
-            self.cache[filepath] = file_hash
-            return file_hash
-            
-        except Exception as e:
-            self.logger.error(f"Error calculating hash for {filepath}: {e}")
-            return None
-    
-    def get_network_activity(self, pid):
-        """
-        Get network connections for a specific process
-        This helps detect if the process is sending data over the network
-        """
-        try:
-            proc = psutil.Process(pid)
-            connections = proc.connections(kind='inet')
-            network_info = []
-            
-            for conn in connections:
-                connection_data = {
-                    'local_address': f"{conn.laddr.ip}:{conn.laddr.port}",
-                    'remote_address': f"{conn.raddr.ip}:{conn.raddr.port}" if conn.raddr else None,
-                    'status': conn.status,
-                    'type': 'TCP' if conn.type == 1 else 'UDP'
-                }
-                network_info.append(connection_data)
-            
-            return network_info
-            
-        except Exception as e:
-            self.logger.error(f"Error getting network activity for PID {pid}: {e}")
-            return []
-    
-    def is_trusted_application(self, process_name):
-        """
-        Check if a process is in the trusted applications list
-        """
-        trusted_apps = [
-            'zoom.exe', 'zoomus.exe',
-            'teams.exe', 'ms-teams.exe',
-            'skype.exe',
-            'chrome.exe',
-            'firefox.exe',
-            'camera.exe',
-            'obs64.exe', 'obs32.exe',
-            'discord.exe',
-            'slack.exe'
-        ]
-        return process_name.lower() in trusted_apps
+                    subkey_name = winreg.EnumKey(key, i)
+                    i += 1
+
+                    subkey = winreg.OpenKey(key, subkey_name)
+
+                    try:
+                        start_time, _ = winreg.QueryValueEx(subkey, "LastUsedTimeStart")
+                        stop_time, _ = winreg.QueryValueEx(subkey, "LastUsedTimeStop")
+
+                        # Active webcam usage
+                        if start_time > stop_time:
+
+                            exe_name = subkey_name.replace("#", "\\").split("\\")[-1].lower()
+
+                            for proc in psutil.process_iter(['pid','name','create_time','ppid']):
+
+                                try:
+                                    if proc.info['name'].lower() == exe_name:
+
+                                        proc_obj = psutil.Process(proc.info['pid'])
+
+                                        # Remove browser child processes
+                                        parent = proc_obj.parent()
+                                        if parent and parent.name().lower() == exe_name:
+                                            continue
+
+                                        # Ensure network activity
+                                        try:
+                                            connections = proc_obj.net_connections()
+                                        except AttributeError:
+                                            connections = proc_obj.connections()
+
+                                        if len(connections) == 0:
+                                            continue
+
+                                        pids[proc.info['pid']] = proc.info['create_time']
+
+                                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                                    continue
+
+                    except FileNotFoundError:
+                        pass
+
+                    winreg.CloseKey(subkey)
+
+                except OSError:
+                    break
+
+            winreg.CloseKey(key)
+
+        except OSError:
+            continue
+
+    return pids
 
 
-# Test this basic version
-if __name__ == "__main__":
-    identifier = ProcessIdentifier()
-    print("ProcessIdentifier created successfully!")
-    
-    # Get all processes
-    all_processes = identifier.get_all_processes()
-    print(f"Found {len(all_processes)} running processes")
-    
-    # Show first 5 processes
-    print("\nFirst 5 processes:")
-    for proc in all_processes[:5]:
-        print(f"PID: {proc['pid']}, Name: {proc['name']}")
-    
-    # Check for camera usage
-    print("\nScanning for camera usage...")
-    camera_processes = identifier.get_processes_using_camera()
-    
-    if camera_processes:
-        print(f"\nFound {len(camera_processes)} process(es) using camera:")
-        for proc in camera_processes:
-            print(f"\nProcess: {proc['name']}")
-            print(f"  PID: {proc['pid']}")
-            print(f"  User: {proc['username']}")
-            print(f"  CPU: {proc['cpu_percent']}%")
-            print(f"  Memory: {proc['memory_mb']} MB")
-            print(f"  Path: {proc['exe_path']}")
-            if proc['exe_hash']:
-                print(f"  Hash: {proc['exe_hash']}")
+# ─────────────────────────────────────────────
+# STEP 2 — FALLBACK DETECTION
+# ─────────────────────────────────────────────
+
+def _get_pids_via_name_fallback():
+
+    pids = {}
+
+    for proc in psutil.process_iter(['pid','name','create_time','ppid']):
+
+        try:
+            name = proc.info['name'].lower().replace(".exe","")
+
+            if not any(k in name for k in KNOWN_APPS):
+                continue
+
+            proc_obj = psutil.Process(proc.info['pid'])
+
+            parent = proc_obj.parent()
+
+            if parent and parent.name().lower().replace(".exe","") == name:
+                continue
+
+            try:
+                connections = proc_obj.net_connections()
+            except AttributeError:
+                connections = proc_obj.connections()
+
+            if len(connections) == 0:
+                continue
+
+            pids[proc.info['pid']] = proc.info['create_time']
+
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+    return pids
+
+
+def identify_webcam_processes():
+
+    pids = _get_pids_via_registry()
+
+    if pids:
+        print(f"[process_identification] Registry detected {len(pids)} webcam process(es).")
+
     else:
-        print("No processes currently using camera detected.")
+        print("[process_identification] Registry returned no active webcam processes.")
+        print("[process_identification] Falling back to known-app name detection.")
+        pids = _get_pids_via_name_fallback()
+
+    return pids
+
+
+# ─────────────────────────────────────────────
+# FEATURE EXTRACTION
+# ─────────────────────────────────────────────
+
+def _get_foreground_pid():
+
+    hwnd = user32.GetForegroundWindow()
+
+    pid = ctypes.wintypes.DWORD()
+
+    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+
+    return pid.value
+
+
+def _seconds_since_last_input():
+
+    lii = LASTINPUTINFO()
+
+    lii.cbSize = ctypes.sizeof(LASTINPUTINFO)
+
+    user32.GetLastInputInfo(ctypes.byref(lii))
+
+    return (kernel32.GetTickCount() - lii.dwTime) / 1000.0
+
+
+def extract_features(pid, proc_start):
+
+    now = time.time()
+    dt = datetime.datetime.now()
+
+    try:
+        proc = psutil.Process(pid)
+        proc_name = proc.name().lower().replace(".exe","")
+    except:
+        proc = None
+        proc_name = "unknown"
+
+    is_known_app = int(any(k in proc_name for k in KNOWN_APPS))
+
+    try:
+        is_foreground = int(_get_foreground_pid() == pid)
+    except:
+        is_foreground = 0
+
+    user_active = int(_seconds_since_last_input() < 60)
+
+    is_night = int(dt.hour < 6 or dt.hour >= 22)
+
+    net_count = 0
+    has_network = 0
+
+    if proc:
+
+        try:
+            try:
+                conns = proc.net_connections()
+            except AttributeError:
+                conns = proc.connections()
+
+            net_count = len(conns)
+            has_network = int(net_count > 0)
+
+        except:
+            pass
+
+    # Session-based duration
+    first_seen = _session_start.setdefault(pid, now)
+
+    duration_minutes = round((now - first_seen)/60,3)
+
+    return {
+        "is_known_app": is_known_app,
+        "is_foreground": is_foreground,
+        "user_active": user_active,
+        "is_night": is_night,
+        "has_network_connection": has_network,
+        "network_connection_count": net_count,
+        "duration_minutes": duration_minutes
+    }
+
+
+# ─────────────────────────────────────────────
+# OUTPUT WRITING
+# ─────────────────────────────────────────────
+
+def write_json(features_list):
+
+    with open(OUTPUT_JSON,"w") as f:
+        json.dump(features_list,f,indent=2)
+
+    print(f"[process_identification] JSON written → {OUTPUT_JSON} ({len(features_list)} process(es))")
+
+
+def write_csv(features_list):
+
+    if not features_list:
+        return
+
+    with open(OUTPUT_CSV,"w",newline="") as f:
+
+        writer = csv.DictWriter(f,fieldnames=FEATURE_KEYS)
+
+        writer.writeheader()
+
+        writer.writerows(features_list)
+
+    print(f"[process_identification] CSV written → {OUTPUT_CSV} ({len(features_list)} process(es))")
+
+
+# ─────────────────────────────────────────────
+# MAIN PIPELINE
+# ─────────────────────────────────────────────
+
+def run(output_format="json"):
+
+    print("[process_identification] Scanning for active webcam processes...")
+
+    webcam_pids = identify_webcam_processes()
+
+    features_list = []
+
+    if not webcam_pids:
+        print("[process_identification] No webcam processes found.")
+
+    else:
+
+        for pid,start_time in webcam_pids.items():
+
+            features = extract_features(pid,start_time)
+
+            features_list.append(features)
+
+            print(f"PID {pid}: {features}")
+
+    if output_format in ("json","both"):
+        write_json(features_list)
+
+    if output_format in ("csv","both"):
+        write_csv(features_list)
+
+    return features_list
+
+
+if __name__ == "__main__":
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--format",
+        choices=["json","csv","both"],
+        default="json"
+    )
+
+    args = parser.parse_args()
+
+    while True:
+      run(args.format)
+      time.sleep(10)
