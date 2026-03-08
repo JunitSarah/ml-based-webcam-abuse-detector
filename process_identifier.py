@@ -3,7 +3,8 @@ process_identification.py
 Identifies processes currently accessing the webcam on Windows
 and extracts ML features.
 """
-
+import pandas as pd
+import os
 import csv
 import json
 import time
@@ -13,6 +14,26 @@ import datetime
 
 import psutil
 import winreg
+from mlmodel.ml_detector import predict
+
+def raise_alert(features, score):
+
+    alert_message = f"""
+⚠⚠⚠ SUSPICIOUS WEBCAM ACTIVITY DETECTED ⚠⚠⚠
+Time: {datetime.datetime.now()}
+
+Features:
+{features}
+
+Anomaly Score: {score}
+
+----------------------------------------
+"""
+
+    print(alert_message)
+
+    with open("alerts/alerts_log.txt", "a") as f:
+        f.write(alert_message)
 
 # ─────────────────────────────────────────────
 # CONFIGURATION
@@ -20,6 +41,7 @@ import winreg
 
 OUTPUT_JSON = "process_features.json"
 OUTPUT_CSV = "process_features.csv"
+DATASET_PATH = "mlmodel/training_data.xlsx"
 
 KNOWN_APPS = {
     "zoom", "ms-teams", "teams", "skype", "webex", "discord", "slack",
@@ -208,7 +230,7 @@ def _seconds_since_last_input():
     return (kernel32.GetTickCount() - lii.dwTime) / 1000.0
 
 
-def extract_features(pid, proc_start):
+def extract_features(pid, proc_start, duration_minutes):
 
     now = time.time()
     dt = datetime.datetime.now()
@@ -248,10 +270,6 @@ def extract_features(pid, proc_start):
         except:
             pass
 
-    # Session-based duration
-    first_seen = _session_start.setdefault(pid, now)
-
-    duration_minutes = round((now - first_seen)/60,3)
 
     return {
         "is_known_app": is_known_app,
@@ -260,7 +278,7 @@ def extract_features(pid, proc_start):
         "is_night": is_night,
         "has_network_connection": has_network,
         "network_connection_count": net_count,
-        "duration_minutes": duration_minutes
+        "duration_minutes": round(duration_minutes, 3)
     }
 
 
@@ -291,12 +309,26 @@ def write_csv(features_list):
 
     print(f"[process_identification] CSV written → {OUTPUT_CSV} ({len(features_list)} process(es))")
 
+def append_to_dataset(features):
 
+    df = pd.DataFrame([features])
+
+    if os.path.exists(DATASET_PATH):
+
+        existing = pd.read_excel(DATASET_PATH)
+
+        updated = pd.concat([existing, df], ignore_index=True)
+
+        updated.to_excel(DATASET_PATH, index=False)
+
+    else:
+
+        df.to_excel(DATASET_PATH, index=False)
 # ─────────────────────────────────────────────
 # MAIN PIPELINE
 # ─────────────────────────────────────────────
 
-def run(output_format="json"):
+def run(output_format="json", duration_minutes=0, save_to_dataset=True):
 
     print("[process_identification] Scanning for active webcam processes...")
 
@@ -311,7 +343,16 @@ def run(output_format="json"):
 
         for pid,start_time in webcam_pids.items():
 
-            features = extract_features(pid,start_time)
+            features = extract_features(pid, start_time,duration_minutes)
+          # Save features to dataset
+            if save_to_dataset and duration_minutes > 0:
+              append_to_dataset(features)
+          # ML prediction
+            result, score = predict(features)
+            print(f"ML Prediction: {result} (score={score:.4f})")
+
+            if result == "Suspicious":
+              raise_alert(features, score)
 
             features_list.append(features)
 
@@ -342,4 +383,4 @@ if __name__ == "__main__":
 
     while True:
       run(args.format)
-      time.sleep(10)
+      time.sleep(30)

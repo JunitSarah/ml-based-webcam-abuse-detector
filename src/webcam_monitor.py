@@ -7,10 +7,16 @@ Date: February 2026
 """
 
 import cv2
+cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
 import time
 import logging
 from datetime import datetime
 import threading
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from process_identifier import run
+current_session_processes = None
 
 # Import configuration
 try:
@@ -54,7 +60,7 @@ class WebcamMonitor:
         self.logger = self._setup_logger()
         self.auto_stop_on_off = auto_stop_on_off
         self.webcam_was_on = False  # Track if webcam was ever ON
-        
+        self.webcam_start_time = None
         print(f"✓ WebcamMonitor initialized (checking every {check_interval}s)")
         if auto_stop_on_off:
             print(f"✓ Auto-stop enabled: Will stop when webcam turns OFF")
@@ -155,8 +161,8 @@ class WebcamMonitor:
         if callback in self.observers:
             self.observers.remove(callback)
             self.logger.info(f"Observer unregistered: {callback.__name__}")
-    
-    def notify_observers(self, event_type, timestamp):
+
+    def notify_observers(self, event_type, timestamp, duration_minutes=0):
         """
         Notify all registered observers of a webcam event
         
@@ -165,10 +171,11 @@ class WebcamMonitor:
             timestamp (datetime): When the event occurred
         """
         event_data = {
-            'event_type': event_type,
-            'timestamp': timestamp.isoformat(),
-            'status': self.webcam_status
-        }
+          'event_type': event_type,
+          'timestamp': timestamp.isoformat(),
+          'status': self.webcam_status,
+          'duration_minutes': duration_minutes
+         }
         
         # Call each observer with the event data
         for observer in self.observers:
@@ -215,11 +222,18 @@ class WebcamMonitor:
                         message = "🔴 WEBCAM TURNED ON"
                         log_level = logging.WARNING
                         self.webcam_was_on = True  # Mark that webcam was turned on
+                        self.webcam_start_time = timestamp
+                        duration_minutes = 0
                     else:
                         event_type = "WEBCAM_OFF"
                         message = "⚪ WEBCAM TURNED OFF"
                         log_level = logging.INFO
-                    
+                        if self.webcam_start_time:
+                           duration_minutes = (timestamp - self.webcam_start_time).total_seconds() / 60
+                        else:
+                           duration_minutes = 0
+
+                        print(f"⏱ Webcam usage duration: {round(duration_minutes,2)} minutes")
                     # Log the event
                     self.logger.log(log_level, f"{event_type} detected at {timestamp}")
                     
@@ -230,7 +244,7 @@ class WebcamMonitor:
                     print(f"{'='*60}\n")
                     
                     # Notify all observers
-                    self.notify_observers(event_type, timestamp)
+                    self.notify_observers(event_type, timestamp, duration_minutes)
                     
                     # Update previous status
                     self.previous_status = current_status
@@ -298,26 +312,39 @@ def test_callback(event_data):
     print(f"📢 Callback received: {event_data['event_type']}")
     print(f"   Timestamp: {event_data['timestamp']}")
 
+def process_identification_callback(event_data):
+
+    global current_session_processes
+
+    print(f"\n📢 Event detected: {event_data['event_type']}")
+
+    # When webcam turns ON → detect processes
+    if event_data["event_type"] == "WEBCAM_ON":
+
+        print("🔍 Detecting webcam processes...\n")
+
+        # store detected processes
+        current_session_processes = run("json", 0)
+
+    # When webcam turns OFF → run ML detection with duration
+    if event_data["event_type"] == "WEBCAM_OFF":
+
+        duration = event_data["duration_minutes"]
+
+        print(f"⏱ Webcam session duration: {duration:.2f} minutes")
+
+        if current_session_processes:
+            run("json", duration)
 
 # Main execution (for testing this module standalone)
 if __name__ == "__main__":
-    print("\n" + "="*60)
-    print("WEBCAM MONITOR - MODULE 1 TEST")
-    print("="*60)
-    print("This will monitor your webcam for ON/OFF events")
-    print("Try opening an app that uses your webcam (Zoom, Teams, Camera)")
-    print("The monitor will automatically stop when you close the app")
-    print("="*60 + "\n")
-    
-    # Create monitor instance with auto-stop enabled
+
     monitor = WebcamMonitor(check_interval=2, auto_stop_on_off=True)
-    
-    # Register the test callback
-    monitor.register_observer(test_callback)
-    
-    # Start monitoring
+
+    monitor.register_observer(process_identification_callback)
+
     try:
         monitor.start_monitoring()
+
     except KeyboardInterrupt:
-        print("\nStopping...")
         monitor.stop_monitoring()
