@@ -15,8 +15,7 @@ FEATURES = [
     'duration_minutes'
 ]
 
-
-def test():
+def evaluate():
 
     base_dir = os.path.dirname(__file__)
 
@@ -27,31 +26,34 @@ def test():
 
     print("✓ Model loaded")
 
-    print("\n📂 Loading labeled dataset...")
+    print("\n📂 Loading dataset...")
 
     data = pd.read_excel(os.path.join(base_dir, "labeled_output.xlsx"))
 
-    # convert labels to numeric
-    data["label"] = data["label"].map({
-        "Normal": 0,
-        "Suspicious": 1
-    })
+    if "label" not in data.columns:
+        raise ValueError("Dataset must contain 'label' column")
 
-    X = data[FEATURES].values
-    y = data["label"].values
+    X = data[FEATURES]
+    y = data["label"]
 
+    print(f"Dataset size: {len(data)} samples")
+
+    # scale features
     X_scaled = scaler.transform(X)
 
     print("\n🔍 Predicting anomalies...")
 
     preds = model.predict(X_scaled)
 
+    # convert Isolation Forest output
     preds = np.where(preds == -1, 1, 0)
 
     print("\n📊 Evaluation Results")
-    print("----------------------")
+    print("------------------------")
 
-    print("Accuracy:", accuracy_score(y, preds))
+    accuracy = accuracy_score(y, preds)
+
+    print(f"Accuracy: {accuracy:.4f}")
 
     print("\nConfusion Matrix")
     print(confusion_matrix(y, preds))
@@ -62,6 +64,6 @@ def test():
 
 if __name__ == "__main__":
 
-    print("\n🚀 Running model evaluation\n")
+    print("\n🚀 Evaluating model\n")
 
-    test()
+    evaluate()

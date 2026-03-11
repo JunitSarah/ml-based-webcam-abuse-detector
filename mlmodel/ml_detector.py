@@ -6,7 +6,7 @@ Loads trained ML model and predicts webcam behaviour
 import joblib
 import numpy as np
 import os
-
+from mlmodel.popup_alert import alert_if_suspicious
 BASE_DIR = os.path.dirname(__file__)
 
 model = joblib.load(os.path.join(BASE_DIR, "model", "isolation_forest.pkl"))
@@ -36,5 +36,5 @@ def predict(features_dict):
     prediction = model.predict(X_scaled)[0]
 
     result = "Normal" if prediction == 1 else "Suspicious"
-
+    alert_if_suspicious(prediction, score, features=features_dict)
     return result, score

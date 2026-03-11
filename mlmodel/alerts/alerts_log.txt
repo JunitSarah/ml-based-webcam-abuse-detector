@@ -1,0 +1,98 @@
+2026-03-10 13:55:12,160 | WARNING | [CRITICAL] Score=-0.2500 | Unknown process spike detected |   process: unknown_miner.exe |   cpu_usage: 94% |   unknown_processes: 28 |   session_duration: 42 min |   network_conns: 7
+2026-03-10 14:03:28,108 | WARNING | [CRITICAL] Score=-0.3000 | Suspicious process running alongside camera app |   suspicious_process: python.exe |   camera_app: chrome.exe |   total_processes: 279
+2026-03-10 14:49:41,448 | INFO | Observer registered: process_identification_callback
+2026-03-10 14:49:41,448 | INFO | ============================================================
+2026-03-10 14:49:41,448 | INFO | Webcam monitoring STARTED
+2026-03-10 14:49:41,448 | INFO | ============================================================
+2026-03-10 14:49:50,478 | WARNING | WEBCAM_ON detected at 2026-03-10 14:49:50.476327
+2026-03-10 14:50:04,479 | INFO | WEBCAM_OFF detected at 2026-03-10 14:50:04.479485
+2026-03-10 14:50:07,526 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-10 14:50:07,526 | INFO | Webcam monitoring STOPPED
+2026-03-10 16:16:15,533 | INFO | Observer registered: process_identification_callback
+2026-03-10 16:16:15,533 | INFO | ============================================================
+2026-03-10 16:16:15,533 | INFO | Webcam monitoring STARTED
+2026-03-10 16:16:15,533 | INFO | ============================================================
+2026-03-10 16:20:30,815 | INFO | Observer registered: process_identification_callback
+2026-03-10 16:20:30,816 | INFO | ============================================================
+2026-03-10 16:20:30,816 | INFO | Webcam monitoring STARTED
+2026-03-10 16:20:30,816 | INFO | ============================================================
+2026-03-10 16:20:31,808 | WARNING | WEBCAM_ON detected at 2026-03-10 16:20:31.808968
+2026-03-10 16:21:06,431 | INFO | WEBCAM_OFF detected at 2026-03-10 16:21:06.431941
+2026-03-10 16:21:12,372 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-10 16:21:12,372 | INFO | Webcam monitoring STOPPED
+2026-03-10 16:25:30,769 | INFO | Observer registered: process_identification_callback
+2026-03-10 16:25:30,769 | INFO | ============================================================
+2026-03-10 16:25:30,769 | INFO | Webcam monitoring STARTED
+2026-03-10 16:25:30,770 | INFO | ============================================================
+2026-03-10 16:25:31,684 | WARNING | WEBCAM_ON detected at 2026-03-10 16:25:31.684292
+2026-03-10 16:26:13,572 | INFO | WEBCAM_OFF detected at 2026-03-10 16:26:13.572968
+2026-03-10 16:26:18,788 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-10 16:26:18,788 | INFO | Webcam monitoring STOPPED
+2026-03-11 09:46:56,821 | INFO | Observer registered: process_identification_callback
+2026-03-11 09:46:56,825 | INFO | ============================================================
+2026-03-11 09:46:56,825 | INFO | Webcam monitoring STARTED
+2026-03-11 09:46:56,825 | INFO | ============================================================
+2026-03-11 09:47:34,128 | INFO | Observer registered: process_identification_callback
+2026-03-11 09:47:34,128 | INFO | ============================================================
+2026-03-11 09:47:34,128 | INFO | Webcam monitoring STARTED
+2026-03-11 09:47:34,128 | INFO | ============================================================
+2026-03-11 09:47:43,536 | WARNING | WEBCAM_ON detected at 2026-03-11 09:47:43.536671
+2026-03-11 09:48:01,161 | INFO | WEBCAM_OFF detected at 2026-03-11 09:48:01.161075
+2026-03-11 09:48:03,172 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 09:48:03,185 | INFO | Webcam monitoring STOPPED
+2026-03-11 09:48:46,311 | INFO | Observer registered: process_identification_callback
+2026-03-11 09:48:46,311 | INFO | ============================================================
+2026-03-11 09:48:46,311 | INFO | Webcam monitoring STARTED
+2026-03-11 09:48:46,311 | INFO | ============================================================
+2026-03-11 09:48:55,439 | WARNING | WEBCAM_ON detected at 2026-03-11 09:48:55.439551
+2026-03-11 09:49:14,627 | INFO | WEBCAM_OFF detected at 2026-03-11 09:49:14.627544
+2026-03-11 09:49:15,785 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 09:49:15,791 | INFO | Webcam monitoring STOPPED
+2026-03-11 09:50:04,285 | INFO | Observer registered: process_identification_callback
+2026-03-11 09:50:04,285 | INFO | ============================================================
+2026-03-11 09:50:04,285 | INFO | Webcam monitoring STARTED
+2026-03-11 09:50:04,285 | INFO | ============================================================
+2026-03-11 09:50:15,990 | WARNING | WEBCAM_ON detected at 2026-03-11 09:50:15.990334
+2026-03-11 09:52:35,869 | INFO | WEBCAM_OFF detected at 2026-03-11 09:52:35.869598
+2026-03-11 09:52:37,985 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 09:52:37,985 | INFO | Webcam monitoring STOPPED
+2026-03-11 10:01:23,429 | INFO | Observer registered: process_identification_callback
+2026-03-11 10:01:23,429 | INFO | ============================================================
+2026-03-11 10:01:23,429 | INFO | Webcam monitoring STARTED
+2026-03-11 10:01:23,429 | INFO | ============================================================
+2026-03-11 10:01:32,154 | WARNING | WEBCAM_ON detected at 2026-03-11 10:01:32.154728
+2026-03-11 10:01:44,744 | INFO | WEBCAM_OFF detected at 2026-03-11 10:01:44.744334
+2026-03-11 10:01:46,100 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 10:01:46,100 | INFO | Webcam monitoring STOPPED
+2026-03-11 10:08:04,078 | INFO | Observer registered: process_identification_callback
+2026-03-11 10:08:04,078 | INFO | ============================================================
+2026-03-11 10:08:04,078 | INFO | Webcam monitoring STARTED
+2026-03-11 10:08:04,078 | INFO | ============================================================
+2026-03-11 10:08:08,456 | WARNING | WEBCAM_ON detected at 2026-03-11 10:08:08.456168
+2026-03-11 10:08:26,914 | INFO | WEBCAM_OFF detected at 2026-03-11 10:08:26.914266
+2026-03-11 10:08:28,031 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 10:08:28,031 | INFO | Webcam monitoring STOPPED
+2026-03-11 10:19:54,655 | INFO | Observer registered: process_identification_callback
+2026-03-11 10:19:54,655 | INFO | ============================================================
+2026-03-11 10:19:54,655 | INFO | Webcam monitoring STARTED
+2026-03-11 10:19:54,655 | INFO | ============================================================
+2026-03-11 10:20:03,930 | WARNING | WEBCAM_ON detected at 2026-03-11 10:20:03.930716
+2026-03-11 10:20:29,050 | INFO | WEBCAM_OFF detected at 2026-03-11 10:20:29.050591
+2026-03-11 10:20:30,823 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 10:20:30,823 | INFO | Webcam monitoring STOPPED
+2026-03-11 12:50:54,670 | INFO | Observer registered: process_identification_callback
+2026-03-11 12:50:54,684 | INFO | ============================================================
+2026-03-11 12:50:54,684 | INFO | Webcam monitoring STARTED
+2026-03-11 12:50:54,684 | INFO | ============================================================
+2026-03-11 12:51:03,292 | WARNING | WEBCAM_ON detected at 2026-03-11 12:51:03.292475
+2026-03-11 12:51:19,494 | INFO | WEBCAM_OFF detected at 2026-03-11 12:51:19.494937
+2026-03-11 12:51:19,494 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 12:51:19,494 | INFO | Webcam monitoring STOPPED
+2026-03-11 12:53:11,360 | INFO | Observer registered: process_identification_callback
+2026-03-11 12:53:11,360 | INFO | ============================================================
+2026-03-11 12:53:11,360 | INFO | Webcam monitoring STARTED
+2026-03-11 12:53:11,360 | INFO | ============================================================
+2026-03-11 12:54:04,649 | WARNING | WEBCAM_ON detected at 2026-03-11 12:54:04.649913
+2026-03-11 12:54:34,337 | INFO | WEBCAM_OFF detected at 2026-03-11 12:54:34.337211
+2026-03-11 12:54:36,499 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 12:54:36,499 | INFO | Webcam monitoring STOPPED

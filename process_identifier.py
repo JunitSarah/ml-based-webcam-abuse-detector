@@ -15,6 +15,9 @@ import datetime
 import psutil
 import winreg
 from mlmodel.ml_detector import predict
+from mlmodel.process_detector import get_camera_app
+
+LOG_FILE = os.path.join(os.getcwd(), "logs", "webcam_logs.csv")
 
 def raise_alert(features, score):
 
@@ -42,6 +45,7 @@ Anomaly Score: {score}
 OUTPUT_JSON = "process_features.json"
 OUTPUT_CSV = "process_features.csv"
 DATASET_PATH = "mlmodel/training_data.xlsx"
+DASHBOARD_LOG = "../logs/webcam_logs.csv"
 
 KNOWN_APPS = {
     "zoom", "ms-teams", "teams", "skype", "webex", "discord", "slack",
@@ -324,9 +328,32 @@ def append_to_dataset(features):
     else:
 
         df.to_excel(DATASET_PATH, index=False)
+
+
 # ─────────────────────────────────────────────
 # MAIN PIPELINE
 # ─────────────────────────────────────────────
+
+def write_dashboard_log(app_name, duration_minutes, status):
+
+    now = datetime.datetime.now()
+
+    row = {
+        "application": app_name,
+        "date": now.strftime("%Y-%m-%d"),
+        "time": now.strftime("%H:%M:%S"),
+        "duration": f"{round(duration_minutes,2)} min",
+        "status": status
+    }
+
+    df = pd.DataFrame([row])
+
+    if os.path.exists(LOG_FILE):
+        df.to_csv(LOG_FILE, mode="a", header=False, index=False)
+    else:
+        df.to_csv(LOG_FILE, index=False)
+
+    print("✔ Dashboard log written:", row)
 
 def run(output_format="json", duration_minutes=0, save_to_dataset=True):
 
@@ -341,15 +368,26 @@ def run(output_format="json", duration_minutes=0, save_to_dataset=True):
 
     else:
 
-        for pid,start_time in webcam_pids.items():
+        for pid,start_time in webcam_pids.items(): 
+            features = extract_features(pid, start_time, duration_minutes)
 
-            features = extract_features(pid, start_time,duration_minutes)
-          # Save features to dataset
-            if save_to_dataset and duration_minutes > 0:
-              append_to_dataset(features)
-          # ML prediction
             result, score = predict(features)
+
+            try:
+                proc = psutil.Process(pid)
+                app_name = proc.name()
+            except:
+                app_name = "unknown"
+
             print(f"ML Prediction: {result} (score={score:.4f})")
+
+            if save_to_dataset and duration_minutes > 0 and not features_list:
+              append_to_dataset(features)
+
+            # Write row to dashboard CSV
+            if duration_minutes > 0:
+                write_dashboard_log(app_name, duration_minutes, result)
+            
 
             if result == "Suspicious":
               raise_alert(features, score)
@@ -357,6 +395,7 @@ def run(output_format="json", duration_minutes=0, save_to_dataset=True):
             features_list.append(features)
 
             print(f"PID {pid}: {features}")
+            break
 
     if output_format in ("json","both"):
         write_json(features_list)
