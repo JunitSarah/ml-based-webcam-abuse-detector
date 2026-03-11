@@ -5,7 +5,17 @@ import os
 app = Flask(__name__)
 
 DATASET_PATH = "../mlmodel/training_data.xlsx"
+import json
+from pathlib import Path
 
+ALERT_FILE = Path("alerts/dashboard_alerts.json")
+
+@app.route("/alerts")
+def get_alerts():
+    if ALERT_FILE.exists():
+        with open(ALERT_FILE) as f:
+            return json.load(f)
+    return []
 def load_data():
 
     if not os.path.exists(DATASET_PATH):

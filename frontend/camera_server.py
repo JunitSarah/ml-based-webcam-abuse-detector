@@ -23,14 +23,14 @@ def get_alerts():
 
     alerts = []
 
-    alert_file = os.path.join(os.path.dirname(os.getcwd()), "alerts", "alerts_log.txt")
+    if os.path.exists(LOG_FILE):
 
-    if os.path.exists(alert_file):
+        with open(LOG_FILE, newline="") as f:
+            reader = csv.DictReader(f)
 
-        with open(alert_file,"r") as f:
-            lines = f.readlines()
-
-        alerts = [line.strip() for line in lines if line.strip()]
+            for row in reader:
+                if row["status"].upper() == "SUSPICIOUS":
+                    alerts.append(row)
 
     return jsonify(alerts)
 

@@ -1,3 +1,5 @@
+print("SCRIPT STARTED")
+
 from ml_detector import predict
 from popup_alert import alert_if_suspicious
 
@@ -13,10 +15,13 @@ features = {
 
 prediction, score = predict(features)
 
-print("\nSimulated Webcam Access")
-print("-----------------------")
-print("Features:", features)
+print("\nManual ML Test")
+print("----------------")
 print("Prediction:", prediction)
-print("Anomaly Score:", score)
+print("Score:", score)
 
-alert_if_suspicious(prediction, score)
+# Convert label to model format
+pred_value = -1 if prediction == "Suspicious" else 1
+
+
+

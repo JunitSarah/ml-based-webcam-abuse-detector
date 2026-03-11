@@ -9,6 +9,7 @@ import os
 
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 FEATURES = [
     'is_known_app',
@@ -35,10 +36,20 @@ def train():
 
     X = df[FEATURES].values
 
+# Split dataset
+    X_train, X_test = train_test_split(
+       X,
+        test_size=0.3,
+        random_state=42,
+        shuffle=True
+    )
+
     print("\n⚙ Scaling features...")
 
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
     print("\n🌲 Training Isolation Forest...")
 
@@ -48,12 +59,12 @@ def train():
         random_state=42
     )
 
-    model.fit(X_scaled)
+    model.fit(X_train_scaled)
 
     print("✓ Model training complete")
 
     # Compute anomaly scores
-    scores = model.decision_function(X_scaled)
+    scores = model.decision_function(X_test_scaled)
 
     threshold = np.percentile(scores, CONTAMINATION * 100)
 

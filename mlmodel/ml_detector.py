@@ -6,7 +6,10 @@ Loads trained ML model and predicts webcam behaviour
 import joblib
 import numpy as np
 import os
-from mlmodel.popup_alert import alert_if_suspicious
+try:
+    from mlmodel.popup_alert import alert_if_suspicious
+except ImportError:
+    from popup_alert import alert_if_suspicious
 BASE_DIR = os.path.dirname(__file__)
 
 model = joblib.load(os.path.join(BASE_DIR, "model", "isolation_forest.pkl"))

@@ -15,25 +15,27 @@ import datetime
 import psutil
 import winreg
 from mlmodel.ml_detector import predict
-from mlmodel.process_detector import get_camera_app
+from mlmodel.process_detector import get_camera_app 
+
 
 LOG_FILE = os.path.join(os.getcwd(), "logs", "webcam_logs.csv")
 
-def raise_alert(features, score):
+def raise_alert(alert_data, score):
 
     alert_message = f"""
-⚠⚠⚠ SUSPICIOUS WEBCAM ACTIVITY DETECTED ⚠⚠⚠
-Time: {datetime.datetime.now()}
+    ⚠ SUSPICIOUS WEBCAM ACTIVITY DETECTED ⚠
 
-Features:
-{features}
-
-Anomaly Score: {score}
+    Application: {alert_data["application"]}
+    Time: {alert_data["time"]}
+    Duration: {alert_data["duration"]} min
+    Score: {score}
 
 ----------------------------------------
 """
 
     print(alert_message)
+
+    os.makedirs("alerts", exist_ok=True)
 
     with open("alerts/alerts_log.txt", "a") as f:
         f.write(alert_message)
@@ -272,8 +274,8 @@ def extract_features(pid, proc_start, duration_minutes):
             has_network = int(net_count > 0)
 
         except:
-            pass
-
+            pass 
+    
 
     return {
         "is_known_app": is_known_app,
@@ -371,7 +373,13 @@ def run(output_format="json", duration_minutes=0, save_to_dataset=True):
         for pid,start_time in webcam_pids.items(): 
             features = extract_features(pid, start_time, duration_minutes)
 
-            result, score = predict(features)
+            result = "Normal"
+            score = 0
+
+            # Run ML only after webcam session ends
+            if duration_minutes > 0:
+                result, score = predict(features)
+                print(f"ML Prediction: {result} (score={score:.4f})")
 
             try:
                 proc = psutil.Process(pid)
@@ -379,7 +387,7 @@ def run(output_format="json", duration_minutes=0, save_to_dataset=True):
             except:
                 app_name = "unknown"
 
-            print(f"ML Prediction: {result} (score={score:.4f})")
+            
 
             if save_to_dataset and duration_minutes > 0 and not features_list:
               append_to_dataset(features)
@@ -390,7 +398,15 @@ def run(output_format="json", duration_minutes=0, save_to_dataset=True):
             
 
             if result == "Suspicious":
-              raise_alert(features, score)
+
+                alert_data = {
+                "application": app_name,
+                "duration": duration_minutes,
+                "time": datetime.datetime.now().strftime("%H:%M:%S"),
+                "score": score
+                }
+                raise_alert(alert_data, score)
+            
 
             features_list.append(features)
 
