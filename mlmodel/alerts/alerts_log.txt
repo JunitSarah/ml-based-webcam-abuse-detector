@@ -262,3 +262,30 @@
 2026-03-11 22:53:33,487 | INFO | Auto-stopping: Webcam turned OFF after being ON
 2026-03-11 22:53:33,487 | INFO | Webcam monitoring STOPPED
 2026-03-11 22:53:56,446 | WARNING | [SUSPICIOUS] Score=-0.0190 | Night-time activity with inactive user |   is_known_app: 0 |   is_foreground: 0 |   user_active: 0 |   is_night: 1 |   has_network_connection: 1 |   network_connection_count: 15 |   duration_minutes: 20
+2026-03-11 23:32:01,772 | INFO | Observer registered: process_identification_callback
+2026-03-11 23:32:01,772 | INFO | ============================================================
+2026-03-11 23:32:01,772 | INFO | Webcam monitoring STARTED
+2026-03-11 23:32:01,772 | INFO | ============================================================
+2026-03-11 23:32:10,170 | WARNING | WEBCAM_ON detected at 2026-03-11 23:32:10.170663
+2026-03-11 23:32:35,839 | INFO | WEBCAM_OFF detected at 2026-03-11 23:32:35.839946
+2026-03-11 23:32:37,137 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-11 23:32:37,138 | INFO | Webcam monitoring STOPPED
+2026-03-11 23:33:07,556 | WARNING | [SUSPICIOUS] Score=-0.0263 | Night-time activity with inactive user |   is_known_app: 0 |   is_foreground: 0 |   user_active: 0 |   is_night: 1 |   has_network_connection: 1 |   network_connection_count: 15 |   duration_minutes: 20
+2026-03-12 08:24:18,514 | INFO | Observer registered: process_identification_callback
+2026-03-12 08:24:18,530 | INFO | ============================================================
+2026-03-12 08:24:18,530 | INFO | Webcam monitoring STARTED
+2026-03-12 08:24:18,530 | INFO | ============================================================
+2026-03-12 08:24:25,832 | WARNING | WEBCAM_ON detected at 2026-03-12 08:24:25.832881
+2026-03-12 08:25:04,964 | INFO | WEBCAM_OFF detected at 2026-03-12 08:25:04.964758
+2026-03-12 08:25:07,167 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-12 08:25:07,167 | INFO | Webcam monitoring STOPPED
+2026-03-12 08:26:05,652 | WARNING | [SUSPICIOUS] Score=-0.0263 | Night-time activity with inactive user |   is_known_app: 0 |   is_foreground: 0 |   user_active: 0 |   is_night: 1 |   has_network_connection: 1 |   network_connection_count: 15 |   duration_minutes: 20
+2026-03-12 08:48:00,627 | INFO | Observer registered: process_identification_callback
+2026-03-12 08:48:00,627 | INFO | ============================================================
+2026-03-12 08:48:00,627 | INFO | Webcam monitoring STARTED
+2026-03-12 08:48:00,627 | INFO | ============================================================
+2026-03-12 08:48:12,642 | WARNING | WEBCAM_ON detected at 2026-03-12 08:48:12.642932
+2026-03-12 08:48:23,677 | INFO | WEBCAM_OFF detected at 2026-03-12 08:48:23.677046
+2026-03-12 08:48:25,087 | INFO | Auto-stopping: Webcam turned OFF after being ON
+2026-03-12 08:48:25,087 | INFO | Webcam monitoring STOPPED
+2026-03-12 08:48:53,697 | WARNING | [SUSPICIOUS] Score=-0.0263 | Night-time activity with inactive user |   is_known_app: 0 |   is_foreground: 0 |   user_active: 0 |   is_night: 1 |   has_network_connection: 1 |   network_connection_count: 15 |   duration_minutes: 20

@@ -1,5 +1,23 @@
 [
   {
+    "timestamp": "2026-03-12 08:48:53",
+    "severity": "SUSPICIOUS",
+    "score": -0.0263,
+    "reason": "Night-time activity with inactive user"
+  },
+  {
+    "timestamp": "2026-03-12 08:26:05",
+    "severity": "SUSPICIOUS",
+    "score": -0.0263,
+    "reason": "Night-time activity with inactive user"
+  },
+  {
+    "timestamp": "2026-03-11 23:33:07",
+    "severity": "SUSPICIOUS",
+    "score": -0.0263,
+    "reason": "Night-time activity with inactive user"
+  },
+  {
     "timestamp": "2026-03-11 22:53:56",
     "severity": "SUSPICIOUS",
     "score": -0.019,

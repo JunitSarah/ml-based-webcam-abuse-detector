@@ -4,6 +4,15 @@ import joblib
 import os
 
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import balanced_accuracy_score
+
+
+
+from sklearn.metrics import roc_auc_score
+
+
+
+
 
 FEATURES = [
     'is_known_app',
@@ -51,17 +60,19 @@ def test():
     print("\n📊 Evaluation Results")
     print("----------------------")
 
-    print("Accuracy:", accuracy_score(y, preds))
 
     print("\nConfusion Matrix")
     print(confusion_matrix(y, preds))
 
     print("\nClassification Report")
     print(classification_report(y, preds))
+    print("Accuracy:", balanced_accuracy_score(y, preds))
+    
+
 
 
 if __name__ == "__main__":
 
     print("\n🚀 Running model evaluation\n")
-
+    
     test()
