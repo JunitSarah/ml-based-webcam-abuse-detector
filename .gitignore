@@ -18,7 +18,8 @@ build/
 *.swo
 
 # Logs and Database
-logs/
+logs/*
+!logs/.gitkeep
 *.log
 *.db
 *.sqlite
