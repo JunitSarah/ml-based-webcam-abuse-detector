@@ -1,44 +1,28 @@
 <div align="center">
-<img src="https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-<img src="https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" />
-<img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" />
-<br/><br/>
-  
-# *ML-Based Webcam Access Abuse Detection System*
+
+# ML-Based Webcam Access Abuse Detection System
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+
+> Behavioral anomaly detection that protects your privacy — locally, in real time.Detects unauthorized or suspicious webcam access using machine learning, without ever sending your data to an external server.
 </div>
-### *Behavioral anomaly detection that protects your privacy — locally, in real time.*
 
-<br/>
-
-> Detects unauthorized or suspicious webcam access using machine learning, without ever sending your data to an external server.
-
-
-
----
-
-## 📌 Overview
-
+## 🔗 Overview
 The **ML-Based Webcam Access Abuse Detection System** is a privacy-first, locally-running security tool that continuously monitors webcam usage on a user's machine. It uses **unsupervised machine learning** (Isolation Forest) to model normal webcam access behavior and raise real-time alerts when anomalies are detected — including stealthy, previously unknown threats that signature-based tools would miss.
 
-Unlike conventional antivirus or permission-based access controls, this system is **behavior-aware**: it doesn't just ask *who* accessed the webcam, but *how*, *when*, and *why* — and flags anything that doesn't fit the learned pattern.
 
----
-
-## 🚨 The Problem
-
+## 🔗 The Problem
 Modern spyware, RATs (Remote Access Trojans), and rogue applications frequently exploit webcam access silently in the background. Traditional defenses:
-
--  Rely on known threat signatures
--  Only show a hardware indicator light (easily bypassed in software)
--  Require cloud connectivity, raising additional privacy concerns
--  Cannot detect **behavioral anomalies** from legitimate-looking processes
-
+- Rely on known threat signatures
+- Only show a hardware indicator light (easily bypassed in software)
+- Require cloud connectivity, raising additional privacy concerns
+- Cannot detect **behavioral anomalies** from legitimate-looking processes
 This system addresses all of the above.
 
----
 
-## ✅ Key Features
-
+## 🔗 Core Features
 | Feature | Description |
 |---|---|
 |  **Real-Time Monitoring** | Continuously tracks all processes accessing the webcam |
@@ -51,170 +35,177 @@ This system addresses all of the above.
 
 ---
 
-##  How It Works
-
-The system extracts **behavioral features** from any application accessing the webcam and scores them against a trained anomaly model.
-
+## 🔗 Architecture
 ### System Workflow
-## How It Works
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
-│  1. 📡 Monitor system processes → detect webcam access      │
+│  1.    Monitor system processes → detect webcam access      │
 │                        │                                    │
 │                        ▼                                    │
-│  2. 🧩 Extract behavioral features                          │
+│  2.    Extract behavioral features                          │
 │        (app identity, user interaction, network, duration)  │
 │                        │                                    │
 │                        ▼                                    │
-│  3. ⚙️  Pre-process via Feature Scaler                       │
+│  3.    Pre-process via Feature Scaler                       │
 │                        │                                    │
 │                        ▼                                    │
-│  4. 🤖 Pass to trained Isolation Forest model               │
+│  4.    Pass to trained Isolation Forest model               │
 │                        │                                    │
 │                        ▼                                    │
-│  5. 📈 Calculate anomaly score → classify behavior          │
+│  5.    Calculate anomaly score → classify behavior          │
 │                        │                                    │
 │                        ▼                                    │
-│  6. 🔔 Alert user if suspicious behavior detected           │
+│  6.    Alert user if suspicious behavior detected           │
 │                        │                                    │
 │                        ▼                                    │
-│  7. 📝 Log suspicious event for further analysis            │
+│  7.    Log suspicious event for further analysis            │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Behavioral Features Extracted
-
-- **Application Identity** — which process is accessing the camera and its metadata
-- **User Interaction State** — is the user actively using the machine or is it idle?
-- **Network Connectivity** — is the accessing process communicating externally?
-- **Webcam Usage Duration** — how long has the camera been in use?
-- **Process Context** — parent process, execution path, and behavioral history
+| Feature | Description |
+|---|---|
+| **Application Identity** | Which process is accessing the camera and its metadata |
+| **User Interaction State** | Is the user actively using the machine or is it idle? |
+| **Network Connectivity** | Is the accessing process communicating externally? |
+| **Webcam Usage Duration** | How long has the camera been in use? |
+| **Process Context** | Parent process, execution path, and behavioral history |
 
 ### Anomaly Detection: Isolation Forest
-
 The **Isolation Forest** algorithm works by randomly partitioning feature space. Anomalous data points are isolated faster (shorter path length in the tree) than normal ones, making it highly effective for:
-
 - Detecting **novel, unknown threats** without labeled training data
-- Operating in **unsupervised mode** (no manual labeling required)
+- Operating in **unsupervised mode** — no manual labeling required
 - Running efficiently with **low memory and CPU overhead**
 
----
 
-## 🛠️ Tech Stack
+## 🔗 Tech Stack
+| Layer | Technology |
+|---|---|
+| **Language** | Python 3.8+ |
+| **ML Engine** | Scikit-learn (Isolation Forest, Feature Scaling) |
+| **System Monitoring** | psutil (Process & system-level webcam tracking) |
+| **Data Layer** | Pandas (Feature engineering & log management) |
+| **Frontend** | HTML / CSS / JavaScript |
+| **Device Tracking** | handle64.exe (Windows handle utility) |
 
-```
-Language     →  Python 3.8+
-ML Engine    →  Scikit-learn  (Isolation Forest, Feature Scaling)
-Monitoring   →  psutil        (Process & system-level webcam tracking)
-Data Layer   →  Pandas        (Feature engineering & log management)
-```
 
----
-
-## 📂 Project Structure
-
+## 🔗 Project Structure
 ```
 ml-based-webcam-abuse-detector/
 │
-├── src/                              # Core source files
+├── src/                               # Core source files
 │
-├── mlmodel/                          # Isolation Forest model & training logic
+├── mlmodel/                           # Isolation Forest model & training logic
 │
-├── dashboard/                        # Real-time monitoring dashboard
+├── dashboard/                         # Real-time monitoring dashboard
 │
-├── frontend/                         # UI layer (HTML/CSS/JS)
+├── frontend/                          # UI layer (HTML/CSS/JS)
 │
-├── alerts/                           # Alert generation & notification handling
+├── alerts/                            # Alert generation & notification handling
 │
-├── logs/                             # Suspicious event logs
+├── logs/                              # Suspicious event logs
 │
-├── process_identifier.py             # Main webcam process identification engine
-├── test_process_identifier.py        # Unit tests for process identifier
-├── process_features.json             # Extracted behavioral feature definitions
-├── generated_suspicious_samples.xlsx # Sample suspicious activity dataset
-├── handle64.exe                      # Windows handle utility for device tracking
+├── process_identifier.py              # Main webcam process identification engine
+├── test_process_identifier.py         # Unit tests for process identifier
+├── process_features.json              # Extracted behavioral feature definitions
+├── generated_suspicious_samples.xlsx  # Sample suspicious activity dataset
+├── handle64.exe                       # Windows handle utility for device tracking
 ├── .gitignore
 └── README.md
 ```
 
----
+## 🔗 Prerequisites
+Before getting started, make sure you have the following installed:
+- **Python 3.8+** — [Download here](https://www.python.org/downloads/)
+- **pip** — comes bundled with Python
+- **Windows OS** — required for `handle64.exe` webcam handle tracking
+- **Git** — [Download here](https://git-scm.com/)
 
-## 🚀 Getting Started
 
-### Prerequisites
-
+## 🔗 Local Setup
+**1. Clone the repository**
 ```bash
-Python 3.8+
-pip
-```
-
-### Installation
-
-```bash
-# Clone the repository
 git clone https://github.com/JunitSarah/ml-based-webcam-abuse-detector.git
 cd ml-based-webcam-abuse-detector
-
-# Install dependencies
+```
+**2. (Recommended) Create a virtual environment**
+```bash
+python -m venv venv
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS/Linux
+```
+**3. Install dependencies**
+```bash
 pip install -r requirements.txt
 ```
-
-### Running the System
-
+**4. Verify the setup**
 ```bash
-# Start the webcam process detection engine
-python process_identifier.py
-
-# Launch the monitoring dashboard
-python dashboard/
+python --version
 ```
 
-### Running Tests
 
+## 🔗 Running the Application
+**Start the webcam process detection engine**
+```bash
+python process_identifier.py
+```
+**Launch the monitoring dashboard**
+```bash
+python dashboard/
+```
+**Run unit tests**
 ```bash
 python test_process_identifier.py
 ```
+> **Note:** `handle64.exe` must be present in the root directory for Windows webcam handle tracking to work. It is included in the repository.
 
----
 
-## 📊 Sample Output
-
+## 🔗 Usage Guide
+### Monitoring Webcam Activity
+Once `process_identifier.py` is running, the system silently monitors all processes accessing your webcam in the background. Each access event is scored in real time.
+### Understanding the Output
 ```
-[2024-01-15 14:32:01] ✅ NORMAL   — Process: chrome.exe       | Score: -0.12 | Duration: 00:03:21
-[2024-01-15 14:35:44] ✅ NORMAL   — Process: zoom.exe         | Score: -0.08 | Duration: 00:45:10
-[2024-01-15 14:41:09] 🚨 ALERT    — Process: svchost.exe      | Score:  0.61 | Duration: 00:00:04
+[2024-01-15 14:32:01] ✅ NORMAL  — Process: chrome.exe    | Score: -0.12 | Duration: 00:03:21
+[2024-01-15 14:35:44] ✅ NORMAL  — Process: zoom.exe      | Score: -0.08 | Duration: 00:45:10
+[2024-01-15 14:41:09] 🚨 ALERT   — Process: svchost.exe   | Score:  0.61 | Duration: 00:00:04
                        → No active user session detected
                        → External network connection active
                        → Event logged: logs/suspicious_events.csv
 ```
+| Score Range | Classification | Meaning |
+|---|---|---|
+| Negative (< 0) | ✅ Normal | Behavior matches learned patterns |
+| Near zero | ⚠️ Borderline | Slightly unusual, monitor closely |
+| Positive (> 0.5) | 🚨 Alert | Anomalous — user notified & event logged |
 
----
+### Reviewing Logs
+Flagged events are saved to `logs/suspicious_events.csv` with full process metadata, timestamps, anomaly scores, and behavioral context for forensic review.
 
-## 🤝 Contributing
+### Dashboard
+Open the dashboard to get a real-time visual overview of webcam activity, anomaly score history, and recent alerts.
 
+## 🔗 Contributing
 Contributions, issues, and feature requests are welcome!
-
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
 5. Open a Pull Request
 
----
-## 🙏 Acknowledgments
-
+## 🔗 Acknowledgments
 A huge thank you to the amazing people who contributed to this project:
 
 | Contributor | GitHub |
-|-------------|--------|
-| Eva Elizabeth | [@evaelizabeth1123](https://github.com/evaelizabeth1123) |
-| Jovina Roy | [@Jovina123](https://github.com/Jovina123) |
-| Malavika Vijay | [@MalavikaVijay-00](https://github.com/MalavikaVijay-00) |
+|---|---|
+| **Eva Elizabeth** | [@evaelizabeth1123](https://github.com/evaelizabeth1123) |
+| **Jovina Roy** | [@Jovina123](https://github.com/Jovina123) |
+| **Malavika Vijay** | [@MalavikaVijay-00](https://github.com/MalavikaVijay-00) |
 
 This project wouldn't have been possible without your hard work, creativity, and collaboration. 💙
+
+---
 
 <div align="center">
 
