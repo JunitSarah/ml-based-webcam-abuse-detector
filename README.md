@@ -6,7 +6,7 @@
 ![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 
-> Behavioral anomaly detection that protects your privacy — locally, in real time.Detects unauthorized or suspicious webcam access using machine learning, without ever sending your data to an external server.
+> Behavioral anomaly detection that protects your privacy - locally, in real time.Detects unauthorized or suspicious webcam access using machine learning, without ever sending your data to an external server.
 </div>
 
 ## 🔗 Overview
